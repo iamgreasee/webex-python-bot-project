@@ -10,7 +10,9 @@ from webexpythonsdk import WebexAPI, Webhook
 load_dotenv()
 
 # Get the bot access token from the environment variable
+load_dotenv()
 WEBEX_TEAMS_ACCESS_TOKEN = os.getenv('WEBEX_TEAMS_ACCESS_TOKEN')
+print(WEBEX_TEAMS_ACCESS_TOKEN)  # This will help confirm the token is correctly loaded.
 
 if not WEBEX_TEAMS_ACCESS_TOKEN:
     raise ValueError("WEBEX_TEAMS_ACCESS_TOKEN is not set correctly in the environment variables")
@@ -44,3 +46,4 @@ if __name__ == '__main__':
     teams_api = WebexAPI(access_token=WEBEX_TEAMS_ACCESS_TOKEN)
     create_webhook(teams_api, 'messages_webhook', '/messages_webhook', 'messages')
     app.run(host='0.0.0.0', port=12000)
+
