@@ -144,14 +144,23 @@ def start_game(roomId, sender):
 
 def check_guess(roomId, guess, sender):
     game = active_games[roomId]
+    
     if guess.lower() == game['correct_answer'].lower():
         # Correct guess
-        game['players'][sender] = game['players'].get(sender, 0) + 1
+        if sender not in game['players']:
+            game['players'][sender] = 0  # Initialize score for a new player if not present
+        game['players'][sender] += 1  # Increment score by 1
         send_message_in_room(roomId, f"Correct, {sender}! Your score has been updated.")
-        # After correct guess, show a new flag
-        start_game(roomId, sender)
+        
+        # After correct guess, show a new flag (but preserve score)
+        country, flag_emoji = random.choice(list(flags.items()))
+        game['flag_emoji'] = flag_emoji
+        game['correct_answer'] = country
+        
+        teams_api.messages.create(roomId=roomId, text="New Flag! Guess again!", attachments=[generate_flag_card(roomId, flag_emoji)])
     else:
         send_message_in_room(roomId, f"Wrong guess, {sender}. Try again!")
+
 
 def show_scoreboard(roomId):
     game = active_games[roomId]
@@ -164,8 +173,10 @@ def stop_game(roomId):
     else:
         send_message_in_room(roomId, "No game is currently running.")
 
-def send_message_in_room(room_id, message):
-    teams_api.messages.create(roomId=room_id, text=message)
+def send_message_in_room(room_id, message, attachments=None):
+    teams_api.messages.create(roomId=room_id, text=message, attachments=attachments)
+
+
 
 @app.route('/attachmentActions_webhook', methods=['POST'])
 def attachmentActions_webhook():
